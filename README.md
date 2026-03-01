@@ -252,8 +252,4 @@ ISC
 
 ## 👨‍💻 Autor
 
-Creado con ❤️ usando React y OpenAI
-
----
-
-**¿Tienes preguntas?** Abre un issue en el repositorio.
+Creado por Isabela Zapata usando React y OpenAI
