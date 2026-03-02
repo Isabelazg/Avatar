@@ -1,22 +1,16 @@
 import { API_BASE_URL } from '../utils/constants';
 
 /**
- * Genera un avatar usando el backend
+ * Genera un avatar base usando análisis + generación
  * @param {File} imageFile - Archivo de imagen
- * @param {Object} options - Opciones de personalización
- * @returns {Promise<Object>} Resultado con la imagen generada
+ * @returns {Promise<Object>} Resultado con avatar, descripción y prompt
  */
-export const generateAvatar = async (imageFile, options) => {
+export const generateAvatar = async (imageFile) => {
   try {
     const formData = new FormData();
     formData.append('image', imageFile);
-    formData.append('skinTone', options.skinTone);
-    formData.append('hairType', options.hairType);
-    formData.append('hairColor', options.hairColor);
-    formData.append('accessory', options.accessory);
-    formData.append('eyeColor', options.eyeColor);
 
-    const response = await fetch(`${API_BASE_URL}/avatar`, {
+    const response = await fetch(`${API_BASE_URL}/avatar/generate`, {
       method: 'POST',
       body: formData,
     });
@@ -29,7 +23,39 @@ export const generateAvatar = async (imageFile, options) => {
 
     return data;
   } catch (error) {
-    console.error('Error en avatarService:', error);
+    console.error('Error en generateAvatar:', error);
+    throw error;
+  }
+};
+
+/**
+ * Edita un avatar existente con modificaciones
+ * @param {string} originalDescription - Descripción original del avatar
+ * @param {Object} modifications - Modificaciones a aplicar
+ * @returns {Promise<Object>} Resultado con avatar editado
+ */
+export const editAvatar = async (originalDescription, modifications) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/avatar/edit`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        originalDescription,
+        modifications
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || 'Error al editar avatar');
+    }
+
+    return data;
+  } catch (error) {
+    console.error('Error en editAvatar:', error);
     throw error;
   }
 };

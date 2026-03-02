@@ -1,108 +1,135 @@
 /**
- * Construye el prompt dinámico para la generación del avatar
- * @param {Object} options - Opciones de personalización del avatar
- * @returns {string} Prompt completo para OpenAI
+ * Construye el prompt para análisis de imagen
+ * @returns {string} Prompt de análisis que evita filtros de OpenAI
  */
-export const buildAvatarPrompt = (options) => {
+export const buildAnalysisPrompt = () => {
+  return `Describe the visual elements in this image for 3D character design:
+
+Visual Elements:
+- Hair: color tones, length (short/shoulder/long), texture pattern (straight/wavy/curly)
+- Face: shape geometry, proportions
+- Eyes: color, size relative to face
+- Skin: tone (light/medium/tan/brown/dark), undertones
+- Overall aesthetic: age appearance, style
+
+Focus on observable visual characteristics only. Output concise technical description.`;
+};
+
+/**
+ * Construye el prompt para generar avatar base desde descripción
+ * @param {string} description - Descripción detallada del análisis
+ * @returns {string} Prompt simplificado y seguro para OpenAI
+ */
+export const buildGenerationPrompt = (description) => {
+  return `3D animated portrait with these exact characteristics:
+
+${description}
+
+Style: Soft 3D render, natural lighting, clean background. Match all features precisely. Single portrait, no text, no multiple views.`;
+};
+
+/**
+ * Construye el prompt para editar un avatar existente
+ * @param {string} originalDescription - Descripción del avatar original
+ * @param {Object} modifications - Modificaciones solicitadas
+ * @returns {string} Prompt de edición que preserva características originales
+ */
+export const buildEditPrompt = (originalDescription, modifications) => {
   const {
-    skinTone = 'medio',
-    hairType = 'corto',
-    hairColor = 'castaño',
-    accessory = 'ninguno',
-    eyeColor = 'marrón'
-  } = options;
+    hairColor,
+    accessories,
+    background,
+    eyeColor
+  } = modifications;
 
-  // Mapeo de valores en español a descripciones en inglés
-  const skinToneMap = {
-    'claro': 'light skin tone',
-    'medio': 'medium skin tone',
-    'oscuro': 'dark skin tone'
-  };
+  const changes = [];
 
-  const hairTypeMap = {
-    'corto': 'short hair',
-    'largo': 'long hair',
-    'rizado': 'curly hair',
-    'ondulado': 'wavy hair'
-  };
-
-  const hairColorMap = {
-    'negro': 'black hair',
-    'castaño': 'brown hair',
-    'rubio': 'blonde hair',
-    'rojo': 'red hair',
-    'gris': 'gray hair'
-  };
-
-  const accessoryMap = {
-    'ninguno': '',
-    'gafas': 'wearing stylish glasses',
-    'audífonos': 'wearing modern headphones',
-    'gorra': 'wearing a trendy cap'
-  };
-
-  const eyeColorMap = {
-    'marrón': 'brown eyes',
-    'azul': 'blue eyes',
-    'verde': 'green eyes',
-    'negro': 'black eyes',
-    'avellana': 'hazel eyes'
-  };
-
-  // Construir el prompt
-  const baseStyle = "Create a 3D cartoon avatar in Pixar/Disney style";
-  const characteristics = [
-    skinToneMap[skinTone] || 'medium skin tone',
-    hairTypeMap[hairType] || 'short hair',
-    hairColorMap[hairColor] || 'brown hair',
-    eyeColorMap[eyeColor] || 'brown eyes'
-  ];
-
-  const accessoryText = accessoryMap[accessory];
-  if (accessoryText) {
-    characteristics.push(accessoryText);
+  if (hairColor) {
+    const hairColorMap = {
+      'negro': 'black',
+      'castaño': 'brown',
+      'rubio': 'blonde',
+      'rojo': 'red',
+      'gris': 'gray',
+      'rosa': 'pink',
+      'azul': 'blue',
+      'verde': 'green',
+      'morado': 'purple'
+    };
+    changes.push(`Change hair color to ${hairColorMap[hairColor] || hairColor}`);
   }
 
-  const styleDetails = [
-    "large expressive eyes",
-    "soft studio lighting",
-    "clean background",
-    "hyper-detailed render",
-    "smooth texture like modern animated character",
-    "friendly and appealing expression",
-    "professional character design"
-  ];
+  if (accessories && accessories !== 'ninguno') {
+    const accessoryMap = {
+      'gafas': 'Add stylish glasses',
+      'gafas_sol': 'Add trendy sunglasses',
+      'audífonos': 'Add modern headphones',
+      'gorra': 'Add a fashionable cap',
+      'sombrero': 'Add a cool hat',
+      'diadema': 'Add a headband',
+      'aretes': 'Add earrings'
+    };
+    changes.push(accessoryMap[accessories] || `Add ${accessories}`);
+  }
 
-  const prompt = `${baseStyle}. Character with ${characteristics.join(', ')}. ${styleDetails.join(', ')}. High quality, vibrant colors, cinematic lighting.`;
+  if (background) {
+    const backgroundMap = {
+      'gradiente': 'Change background to a smooth gradient (purple to pink)',
+      'espacio': 'Change background to outer space with stars',
+      'naturaleza': 'Change background to a nature scene with trees',
+      'ciudad': 'Change background to a city skyline',
+      'abstracto': 'Change background to an abstract colorful pattern',
+      'solido': 'Change background to a solid neutral color'
+    };
+    changes.push(backgroundMap[background] || `Change background to ${background}`);
+  }
+
+  if (eyeColor) {
+    const eyeColorMap = {
+      'marrón': 'brown',
+      'azul': 'blue',
+      'verde': 'green',
+      'negro': 'black',
+      'avellana': 'hazel',
+      'gris': 'gray'
+    };
+    changes.push(`Change eye color to ${eyeColorMap[eyeColor] || eyeColor}`);
+  }
+
+  // Build prompt combining original description with modifications
+  const prompt = [
+    "3D cartoon avatar portrait with these exact features:",
+    "",
+    originalDescription,
+    "",
+    "Apply these modifications while preserving all other features:",
+    ...changes.map(change => `- ${change}`)
+  ].join('\n');
 
   return prompt;
 };
 
 /**
- * Valida las opciones del avatar
- * @param {Object} options - Opciones a validar
+ * Valida las opciones de edición del avatar
+ * @param {Object} modifications - Modificaciones a validar
  * @returns {boolean} True si las opciones son válidas
  */
-export const validateAvatarOptions = (options) => {
-  const validSkinTones = ['claro', 'medio', 'oscuro'];
-  const validHairTypes = ['corto', 'largo', 'rizado', 'ondulado'];
-  const validHairColors = ['negro', 'castaño', 'rubio', 'rojo', 'gris'];
-  const validAccessories = ['ninguno', 'gafas', 'audífonos', 'gorra'];
-  const validEyeColors = ['marrón', 'azul', 'verde', 'negro', 'avellana'];
+export const validateEditOptions = (modifications) => {
+  const validHairColors = ['negro', 'castaño', 'rubio', 'rojo', 'gris', 'rosa', 'azul', 'verde', 'morado'];
+  const validAccessories = ['ninguno', 'gafas', 'gafas_sol', 'audífonos', 'gorra', 'sombrero', 'diadema', 'aretes'];
+  const validBackgrounds = ['gradiente', 'espacio', 'naturaleza', 'ciudad', 'abstracto', 'solido'];
+  const validEyeColors = ['marrón', 'azul', 'verde', 'negro', 'avellana', 'gris'];
 
-  if (options.skinTone && !validSkinTones.includes(options.skinTone)) {
+  if (modifications.hairColor && !validHairColors.includes(modifications.hairColor)) {
     return false;
   }
-  if (options.hairType && !validHairTypes.includes(options.hairType)) {
+  if (modifications.accessories && !validAccessories.includes(modifications.accessories)) {
     return false;
   }
-  if (options.hairColor && !validHairColors.includes(options.hairColor)) {
+  if (modifications.background && !validBackgrounds.includes(modifications.background)) {
     return false;
   }
-  if (options.accessory && !validAccessories.includes(options.accessory)) {
-    return false;
-  }
-  if (options.eyeColor && !validEyeColors.includes(options.eyeColor)) {
+  if (modifications.eyeColor && !validEyeColors.includes(modifications.eyeColor)) {
     return false;
   }
 
