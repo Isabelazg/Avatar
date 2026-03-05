@@ -23,24 +23,24 @@ export const generateAvatarController = async (req, res, next) => {
     // Validar el archivo
     validateImageFile(req.file);
 
-    console.log('📸 Iniciando generación de avatar con MÁXIMA FIDELIDAD FÍSICA...');
+    console.log('Iniciando generación de avatar con MÁXIMA FIDELIDAD FÍSICA...');
     console.log('Archivo:', req.file.originalname, '|', (req.file.size / 1024).toFixed(2), 'KB');
 
     // PASO 1: Convertir imagen a base64
     const imageBase64 = await imageToBase64(filePath);
 
     // PASO 2: Analizar imagen con OpenAI Vision (análisis estructurado y detallado)
-    console.log('🔍 PASO 1/2: Analizando características físicas detalladas...');
+    console.log('PASO 1/2: Analizando características físicas detalladas...');
     const analysisResult = await analyzeImage(imageBase64);
 
     // PASO 3: Generar avatar base usando la descripción (prioridad: fidelidad > estilo)
-    console.log('🎨 PASO 2/2: Generando avatar preservando rasgos exactos...');
+    console.log('PASO 2/2: Generando avatar preservando rasgos exactos...');
     const generationResult = await generateAvatarFromDescription(analysisResult.description);
 
     // Eliminar archivo temporal
     await deleteFile(filePath);
 
-    console.log('✅ Avatar base generado exitosamente');
+    console.log('Avatar base generado exitosamente');
 
     // Enviar respuesta exitosa
     res.status(200).json({
@@ -58,7 +58,7 @@ export const generateAvatarController = async (req, res, next) => {
       await deleteFile(filePath);
     }
 
-    console.error('❌ Error en generateAvatarController:', error);
+    console.error('Error en generateAvatarController:', error);
     next(error);
   }
 };
@@ -96,13 +96,13 @@ export const editAvatarController = async (req, res, next) => {
       });
     }
 
-    console.log('✏️ Iniciando edición de avatar...');
+    console.log('Iniciando edición de avatar...');
     console.log('Modificaciones:', modifications);
 
     // Editar avatar
     const editResult = await editAvatar(originalDescription, modifications);
 
-    console.log('✅ Avatar editado exitosamente');
+    console.log('Avatar editado exitosamente');
 
     // Enviar respuesta exitosa
     res.status(200).json({
@@ -114,7 +114,7 @@ export const editAvatarController = async (req, res, next) => {
     });
 
   } catch (error) {
-    console.error('❌ Error en editAvatarController:', error);
+    console.error('Error en editAvatarController:', error);
     next(error);
   }
 };

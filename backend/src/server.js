@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import avatarRoutes from './routes/avatarRoutes.js';
+import emailRoutes from './routes/emailRoutes.js';
 import { errorHandler, notFound } from './middleware/errorHandler.js';
 
 // Cargar variables de entorno
@@ -28,6 +29,7 @@ app.use((req, res, next) => {
 
 // Rutas
 app.use('/api', avatarRoutes);
+app.use('/api', emailRoutes);
 
 // Ruta raíz
 app.get('/', (req, res) => {
@@ -36,7 +38,8 @@ app.get('/', (req, res) => {
     version: '1.0.0',
     endpoints: {
       health: '/api/health',
-      generateAvatar: 'POST /api/avatar'
+      generateAvatar: 'POST /api/avatar',
+      sendEmail: 'POST /api/send-avatar-email'
     }
   });
 });

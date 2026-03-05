@@ -10,7 +10,7 @@ export const analyzeImage = async (imageBase64) => {
   try {
     const prompt = buildAnalysisPrompt();
 
-    console.log('🔍 Analizando imagen con Vision API (GPT-4o)...');
+    console.log(' Analizando imagen con Vision API (GPT-4o)...');
 
     // Llamada a OpenAI Vision API para analizar la imagen
     const response = await openai.chat.completions.create({
@@ -44,7 +44,7 @@ export const analyzeImage = async (imageBase64) => {
                       description.toLowerCase().includes("i cannot");
 
     if (isRejected) {
-      console.log('⚠️ Vision API rechazó el análisis detallado. Intentando análisis visual simple...');
+      console.log('Vision API rechazó el análisis detallado. Intentando análisis visual simple...');
       
       // Segundo intento con prompt ultra-simple enfocado solo en colores y formas
       try {
@@ -75,14 +75,14 @@ export const analyzeImage = async (imageBase64) => {
         
         if (!simpleDescription.toLowerCase().includes("i'm sorry") && 
             !simpleDescription.toLowerCase().includes("i can't")) {
-          console.log('✅ Análisis visual simple exitoso');
+          console.log('Análisis visual simple exitoso');
           return {
             success: true,
             description: simpleDescription
           };
         }
       } catch (simpleError) {
-        console.log('⚠️ Análisis simple también falló. Usando descripción base.');
+        console.log('Análisis simple también falló. Usando descripción base.');
       }
 
       // Si ambos intentos fallan, usar descripción muy genérica
@@ -92,7 +92,7 @@ export const analyzeImage = async (imageBase64) => {
       };
     }
 
-    console.log('✅ Análisis completado');
+    console.log('Análisis completado');
     console.log('Descripción (primeros 200 caracteres):', description.substring(0, 200) + '...');
     console.log('Longitud total de descripción:', description.length, 'caracteres');
 
@@ -102,7 +102,7 @@ export const analyzeImage = async (imageBase64) => {
     };
 
   } catch (error) {
-    console.error('❌ Error en análisis de imagen:', error);
+    console.error('Error en análisis de imagen:', error);
     handleOpenAIError(error, 'analizar la imagen');
   }
 };
@@ -116,7 +116,7 @@ export const generateAvatarFromDescription = async (description) => {
   try {
     const prompt = buildGenerationPrompt(description);
 
-    console.log('🎨 Generando avatar con máxima fidelidad física...');
+    console.log('Generando avatar con máxima fidelidad física...');
     console.log('Longitud del prompt:', prompt.length, 'caracteres');
 
     // Llamada a OpenAI DALL-E para generar la imagen
@@ -135,9 +135,9 @@ export const generateAvatarFromDescription = async (description) => {
       throw new Error('No se recibió imagen de OpenAI');
     }
 
-    console.log('✅ Avatar base generado exitosamente');
+    console.log('Avatar base generado exitosamente');
     if (generatedImage.revised_prompt) {
-      console.log('📝 Prompt revisado por DALL-E:', generatedImage.revised_prompt.substring(0, 150) + '...');
+      console.log('Prompt revisado por DALL-E:', generatedImage.revised_prompt.substring(0, 150) + '...');
     }
 
     return {
@@ -147,7 +147,7 @@ export const generateAvatarFromDescription = async (description) => {
     };
 
   } catch (error) {
-    console.error('❌ Error en generación de avatar:', error);
+    console.error('Error en generación de avatar:', error);
     handleOpenAIError(error, 'generar el avatar');
   }
 };
@@ -205,7 +205,7 @@ export const editAvatar = async (originalDescription, modifications) => {
 const handleOpenAIError = (error, action) => {
   if (error.status === 400) {
     if (error.message && error.message.includes('billing')) {
-      throw new Error('⚠️ Tu cuenta de OpenAI ha alcanzado el límite de facturación. Por favor, agrega créditos en platform.openai.com/account/billing');
+      throw new Error('Tu cuenta de OpenAI ha alcanzado el límite de facturación. Por favor, agrega créditos en platform.openai.com/account/billing');
     }
     throw new Error(`Solicitud inválida a OpenAI al ${action}: ${error.message}`);
   }

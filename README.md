@@ -5,13 +5,16 @@ Sistema completo de generación de avatares 3D estilo Pixar/Disney usando Inteli
 ## ✨ Características
 
 - 🖼️ Subida de imágenes con drag & drop
+- 📸 Captura de foto con cámara web integrada
 - 🎨 Panel de personalización completo
   - Color de piel
   - Tipo y color de cabello
   - Color de ojos
   - Accesorios (gafas, audífonos, gorra)
+  - Fondo personalizable
 - 🤖 Generación con IA usando OpenAI DALL-E 3
 - 💾 Descarga del avatar generado
+- 📧 Envío de avatar por correo electrónico
 - 🔄 Regeneración de avatares
 - 📱 Diseño responsive
 - ⚡ Interfaz moderna con TailwindCSS
@@ -25,12 +28,14 @@ backend/
 │   ├── config/
 │   │   └── openai.config.js          # Configuración de OpenAI
 │   ├── controllers/
-│   │   └── avatarController.js       # Controladores de lógica
+│   │   ├── avatarController.js       # Controladores de avatares
+│   │   └── emailController.js        # Controlador de envío de emails
 │   ├── services/
 │   │   ├── openaiService.js          # Servicio de OpenAI
 │   │   └── imageService.js           # Procesamiento de imágenes
 │   ├── routes/
-│   │   └── avatarRoutes.js           # Definición de rutas
+│   │   ├── avatarRoutes.js           # Rutas de avatares
+│   │   └── emailRoutes.js            # Rutas de email
 │   ├── middleware/
 │   │   ├── uploadMiddleware.js       # Multer para uploads
 │   │   └── errorHandler.js           # Manejo de errores
@@ -47,9 +52,10 @@ frontend/
 ├── src/
 │   ├── components/
 │   │   ├── AvatarModal.jsx           # Modal principal
-│   │   ├── ImageUploader.jsx         # Componente de subida
-│   │   ├── AvatarEditor.jsx          # Panel de edición
+│   │   ├── ImageUploader.jsx         # Subida de archivos
+│   │   ├── AvatarEditPanel.jsx       # Panel de edición
 │   │   ├── AvatarPreview.jsx         # Preview del avatar
+│   │   ├── CustomSelect.jsx          # Select personalizado
 │   │   └── LoadingSpinner.jsx        # Spinner de carga
 │   ├── services/
 │   │   └── avatarService.js          # Servicios HTTP
@@ -94,7 +100,32 @@ OPENAI_API_KEY=tu_api_key_aqui
 PORT=5000
 NODE_ENV=development
 FRONTEND_URL=http://localhost:3000
+
+# Email Configuration (Gmail)
+EMAIL_USER=tu-email@gmail.com
+EMAIL_PASS=tu-contraseña-de-aplicacion
 ```
+
+### Configurar envío de correos (opcional)
+
+Para usar la funcionalidad de envío de avatares por email:
+
+1. **Habilita 2FA** en tu cuenta de Google
+   - Ve a: https://myaccount.google.com/security
+   - Activa "Verificación en dos pasos"
+
+2. **Genera una contraseña de aplicación**
+   - Ve a: https://myaccount.google.com/apppasswords
+   - Selecciona "Correo" y tu dispositivo
+   - Copia la contraseña de 16 caracteres generada
+
+3. **Agrega las credenciales al archivo `.env`**
+   ```env
+   EMAIL_USER=tu-email@gmail.com
+   EMAIL_PASS=xxxx xxxx xxxx xxxx
+   ```
+
+**Nota:** Sin estas credenciales, el sistema usará un servicio de prueba (Ethereal) que genera un preview del correo sin enviarlo realmente.
 
 ### 3. Configurar Frontend
 
@@ -175,6 +206,26 @@ Genera un avatar con IA
 }
 ```
 
+### `POST /api/send-avatar-email`
+Envía el avatar generado por correo electrónico
+
+**Body (JSON):**
+```json
+{
+  "email": "destinatario@ejemplo.com",
+  "avatar": "base64_string_del_avatar"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Avatar enviado correctamente",
+  "messageId": "message-id"
+}
+```
+
 ## 🎨 Personalización
 
 ### Modificar estilos
@@ -198,6 +249,7 @@ size: "1024x1024",  // Cambiar tamaño aquí
 - **Express** - Framework web
 - **Multer** - Manejo de uploads
 - **OpenAI SDK** - Integración con DALL-E 3
+- **Nodemailer** - Envío de correos electrónicos
 - **dotenv** - Variables de entorno
 
 ### Frontend
@@ -234,6 +286,18 @@ size: "1024x1024",  // Cambiar tamaño aquí
 - Verifica que el puerto 5000 no esté en uso
 - Ejecuta `npm install` en ambas carpetas
 
+### Error al enviar correo: "Error de autenticación"
+- Verifica que `EMAIL_USER` y `EMAIL_PASS` estén configurados correctamente en `.env`
+- Asegúrate de usar una **contraseña de aplicación**, no tu contraseña normal de Gmail
+- Confirma que la verificación en dos pasos (2FA) esté activada en tu cuenta de Google
+- Reinicia el servidor backend después de modificar `.env`
+
+### El correo no llega
+- Revisa la carpeta de SPAM del destinatario
+- Verifica que el email destino sea válido
+- Comprueba los logs del servidor para ver si hay errores
+- Si usas Gmail, verifica que no hayas alcanzado el límite diario de envíos
+
 **📖 Ver [TROUBLESHOOTING.md](TROUBLESHOOTING.md) para más detalles**
 
 ## 📝 Próximas Mejoras
@@ -242,9 +306,11 @@ size: "1024x1024",  // Cambiar tamaño aquí
 - [ ] Sistema de autenticación de usuarios
 - [ ] Galería de avatares generados
 - [ ] Compartir avatares en redes sociales
-- [ ] Más opciones de personalización
+- [ ] Más opciones de personalización (ropa, expresiones)
 - [ ] Modo oscuro
 - [ ] PWA (Progressive Web App)
+- [ ] Historial de avatares enviados por email
+- [ ] Soporte para otros proveedores de email (Outlook, SendGrid)
 
 ## 📄 Licencia
 
